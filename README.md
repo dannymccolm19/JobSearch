@@ -2,6 +2,7 @@
 This is a Job Search application created by me using react.
 # To run 
 run 'npm install' and then 'node index.js' in the terminal while in the project directory.
+Go to http://localhost:3000/ in a web browser to see the app
 
 # Info
 The Jobs are stored in a json file and have a job title that includes the location, as well as a number of categories that are relevent to the job.
