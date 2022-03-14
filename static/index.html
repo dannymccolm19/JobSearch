@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Jobs</title>
+    <style>
+        body { background-color: powderblue;color: navy;}
+        h1 {margin-left:1000px;}
+        h4 {margin-left:1000px;}
+        input {margin-left:1000px;}
+        p {margin-left:750px;}
+        
+    </style>
+</head>
+<body>
+    <h1 >IT Jobs</h1>
+    <br><br>
+    <input type= "button" onclick="getCategories()" value="View Categories">
+    <br><br><br><br>
+    <h4>Search categories:</h4>
+    <input id = 'catSearch' type="text" />
+    <br><br>
+    <input type= "button" onclick="searchCategories()" value="Search">
+    <br><br><br><br>
+    <h4>Search by city:</h4>
+    <input id = 'citySearch' type="text" />
+    <br><br>
+    <input type= "button" onclick="searchCities()" value="Search">
+    <br><br><br>
+    <div id='jobDiv'></div>
+</body>
+<script>
+    //gets jobs.json and calls displayJobs
+    function searchCategories()
+    {   
+        let xReq = new XMLHttpRequest();
+        xReq.onreadystatechange = displayJobs;
+
+        xReq.open('GET','/jobs',true);
+        xReq.send();
+    }
+
+    //gets jobs.json calls displayJobs2
+    function searchCities()
+    {   
+        let xReq = new XMLHttpRequest();
+        xReq.onreadystatechange = displayJobs2;
+
+        xReq.open('GET','/jobs',true);
+        xReq.send();
+    }
+
+    //gets jobs.json calls displayCategories
+    function getCategories()
+    {   
+        let xReq = new XMLHttpRequest();
+        xReq.onreadystatechange = displayCategories;
+
+        xReq.open('GET','/jobs',true);
+        xReq.send();
+    }
+
+    //Returns how many times an object appears in an array
+    function getOccurrence(array, value) {
+        var count = 0;
+        for(let x in array){
+            if (array[x] == value){
+                count++;
+            }
+        }
+        return count;
+    }
+
+    function displayCategories()
+    {
+        if (this.readyState == 4 && this.status == 200)
+        {
+            let jobDiv = document.getElementById('jobDiv');
+            let jobs = JSON.parse(this.responseText);
+            let content =''
+            content += '<br>'
+            
+            //array for the categories
+            const cater = []
+            //Array for each occurence of every category
+            const allCater = []
+            //Array for categories and their number of occurences
+            const occurCater = []
+            for (let j in jobs)
+            {
+                for (let i = 0; i<jobs[j].categories.length; i++){
+                    //Adds each every category to allCater
+                    allCater.push(jobs[j].categories[i])
+                    //Adds the category to cater if it is not already in the array
+                    if (!cater.includes(jobs[j].categories[i])){
+                        cater.push(jobs[j].categories[i]) 
+                    }
+                }
+                
+            }
+
+            for (let c in cater){
+                //Adds each category in cater into occurCater, as well as number of occurences, found using the getOccurrence function
+                occurCater.push({cat : cater[c], occur : getOccurrence(allCater, cater[c])})
+            }
+
+            //Sorts occurCater from most occurences to least
+            occurCater.sort(function(a, b){return b.occur - a.occur});
+
+            //Prints the categorys and occurences on the page
+            for (let c in occurCater){
+            content += `<p>${occurCater[c].cat}: ${occurCater[c].occur} occurences</p><br>` 
+            }
+            jobDiv.innerHTML = content;
+        }
+    }
+
+    function displayJobs()
+    {
+        if (this.readyState == 4 && this.status == 200)
+        {
+            let jobDiv = document.getElementById('jobDiv');
+            let jobs = JSON.parse(this.responseText);
+            let content =''
+            content += '<br>'
+            //Stores the value of the inputted category
+            const category = document.getElementById("catSearch").value
+            //Array for jobs to be printed
+            const jobsList = []
+            for (let j in jobs)
+            {
+                for (let i = 0; i<jobs[j].categories.length; i++){
+                    //adds the job to jobsList if the category is the same as the search
+                    if (jobs[j].categories[i] == category){
+    
+                        jobsList.push(jobs[j].title)
+                    }
+                }
+                
+            }
+
+            //Prints out the jobs found on the page
+            for (let j in jobsList){
+                content += `<p>${jobsList[j]}</p><br>` 
+            }
+            //Prints out message if no jobs are found
+            if(jobsList.length == 0){
+                content += `<p>No jobs found for inputed category!</p><br>`   
+            }
+            jobDiv.innerHTML = content;
+        }
+    }
+
+    function displayJobs2()
+    {
+        if (this.readyState == 4 && this.status == 200)
+        {
+            let jobDiv = document.getElementById('jobDiv');
+            let jobs = JSON.parse(this.responseText);
+            let content =''
+            content += '<br>'
+            //Stores the value of the inputted city
+            const city = document.getElementById("citySearch").value 
+            for (let j in jobs)
+            {
+                //Splits the title by "(". All of the locations in the titles are in brackets
+                let x = jobs[j].title.split("(")
+                //Splits the last element of new array(the location) by ",". city and province/country are seperated by commas
+                let y = x[x.length-1].split(",")
+                    //Prints out the job on the page if: the second last item(the city name in almost all titles) is equal to the search OR the third last item(the city name for canadian cities) is equal to the search
+                    //OR if the last item is equal to "allows remote)" (some jobs allow working remotely, meaning anyone can apply from any city so they will always be printed.)
+                    if (y[y.length-2] == city ||y[y.length-3] == city||y[y.length-1] == "allows remote)"){
+                        content += `<p>${jobs[j].title}</p><br>` 
+                    }
+                
+            
+            }
+
+            jobDiv.innerHTML = content;
+        }
+    }
+
+
+</script>
+</html>
