@@ -1,5 +1,5 @@
 # JobSearch
-This is a Job Search application created by me using react.
+This is a Job Search application created by me using express.
 # To run 
 run 'npm install' and then 'node index.js' in the terminal while in the project directory.
 Go to http://localhost:3000/ in a web browser to see the app
